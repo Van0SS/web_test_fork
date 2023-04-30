@@ -22,3 +22,17 @@ then
 else
     echo "-- '$APP_NAME' already installed, skipping"
 fi
+
+# K8S https://microk8s.io/docs/getting-started
+APP_NAME='microk8s'
+if ! command -v $APP_NAME &> /dev/null
+then
+    echo "-- Installing '$APP_NAME'"
+    sudo snap install microk8s --classic --channel=1.27
+    sudo usermod -a -G microk8s $USER
+    sudo chown -f -R $USER ~/.kube
+    su - $USER
+    microk8s status --wait-ready
+else
+    echo "-- '$APP_NAME' already installed, skipping"
+fi
