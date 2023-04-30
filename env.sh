@@ -1,1 +1,0 @@
-ssh -oHostKeyAlgorithms=+ssh-dss root@198.199.78.103
