@@ -1,3 +1,3 @@
-script_dir="$(dirname "$0")"
-source "$script_dir/local.env"
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/local.env"
 $SSH_COMMAND

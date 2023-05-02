@@ -1,4 +1,4 @@
-script_dir="$(dirname "$0")"
-source "$script_dir/local.env"
-git_root_dir="$(git rev-parse --show-toplevel)"
-docker build -t $APP_NAME "$git_root_dir/app"
+SCRIPT_DIR="$(dirname "$0")"
+source "$SCRIPT_DIR/local.env"
+GIT_ROOT_DIR="$(git rev-parse --show-toplevel)"
+docker build -t $APP_NAME "$GIT_ROOT_DIR/app"
