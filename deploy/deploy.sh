@@ -1,22 +1,41 @@
-#!/bin/bash
-# Fail on any error
+#!/bin/sh
+# Stop on any error
 set -e
 
-GIT_ROOT_DIR="$(git rev-parse --show-toplevel)"
-echo "Apply k8s updates"
-microk8s kubectl apply -f "$GIT_ROOT_DIR/deploy/k8s/"
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+GREEN='\033[0;32m'
 
-REPOSITORY_URL="localhost:32000"
-APP_NAME="web_test"
+color() {
+    APP="deploy"
+    CMD=$1
+    printf "${CYAN}$APP${NC}: ${BLUE}$CMD${NC}\n"
+}
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 <APP_NAME>"
+  exit 1
+fi
+
+APP_NAME="$1"
+ENV="dev"
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+REPOSITORY_URL="localhost:32000"  # This is trusted storage prefix to support local repository in microk8s
 APP_TAG="latest"
-APP_DIR="$GIT_ROOT_DIR/app"
+APP_DIR="$ROOT_DIR/../$APP_NAME" # App should be one directory up from microk8s
+HELM_CHARTS_PATH="$ROOT_DIR/deploy/helm/common/"
+APP_HELM_VALUES="${APP_DIR}/k8s/values/$ENV.yaml"
 
-echo "Building application image"
+color "docker build $APP_DIR -t $REPOSITORY_URL/$APP_NAME:$APP_TAG"
 docker build $APP_DIR -t $REPOSITORY_URL/$APP_NAME:$APP_TAG
-echo "Pushing application image"
+
+color "docker push $REPOSITORY_URL/$APP_NAME:$APP_TAG"
 docker push $REPOSITORY_URL/$APP_NAME:$APP_TAG
-echo "Pulling application image"
+
+color "microk8s ctr image pull $REPOSITORY_URL/$APP_NAME:$APP_TAG"
 microk8s ctr image pull $REPOSITORY_URL/$APP_NAME:$APP_TAG
 
-echo "Apply application updates"
-microk8s kubectl rollout restart deployment
+HELM_CMD="helm upgrade $APP_NAME $HELM_CHARTS_PATH --values $APP_HELM_VALUES --install"
+color "$HELM_CMD"
+$HELM_CMD

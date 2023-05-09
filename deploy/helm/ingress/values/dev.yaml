@@ -1,0 +1,10 @@
+ingress:
+  hosts:
+  - host: dashboard.example.com
+    paths:
+      - from: "/"
+        to: "dashboard"
+  - host: api.example.com
+    paths:
+      - from: "/"
+        to: "api"
